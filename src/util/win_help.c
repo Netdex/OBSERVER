@@ -3,7 +3,8 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
-#include "win_help.h"
+
+#include "util/win_help.h"
 #include "event.h"
 
 HHOOK hKeyb;
@@ -57,11 +58,8 @@ VOID CALLBACK WinEventProcCallback(HWINEVENTHOOK hWinEventHook, DWORD dwEvent,
 
 }
 
-PCHAR *
-CommandLineToArgvA(
-        PCHAR CmdLine,
-        int *_argc
-) {
+// http://alter.org.ua/docs/win/args/
+PCHAR *CommandLineToArgvA(PCHAR CmdLine, int *_argc) {
     PCHAR *argv;
     PCHAR _argv;
     ULONG len;

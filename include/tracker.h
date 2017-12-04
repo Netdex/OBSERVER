@@ -7,20 +7,15 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
-void log_init(char* path, uint8_t *key, size_t len);
+void log_init(char* path, uint8_t *key, size_t len, int mode);
 
 void log_close();
 
-void log_write(void *p, size_t size, size_t len);
+void log_write(void *src, size_t size, size_t len);
 
-void log_b(char c);
-
-void log_w(short c);
-
-void log_d(int c);
-
-void log_q(long long c);
+int log_read(void *dest, size_t size, size_t len);
 
 void print_b(void *c, size_t len);
 #endif //OBSERVER_LOG_CONTROL_H

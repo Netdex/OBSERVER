@@ -37,4 +37,6 @@ void OnActiveWindowTitleChanged(char *title);
 
 void log_event(event_t *e);
 
+int read_event(event_t *e);
+
 #endif //OBSERVER_EVENT_H

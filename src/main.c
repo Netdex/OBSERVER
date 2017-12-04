@@ -3,42 +3,26 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <stdint.h>
-#include <crypto/sha1.h>
-#include <tracker.h>
-#include <log.h>
+#include <event.h>
+#include <unistd.h>
+#include <assert.h>
+#include <config.h>
+#include <reader.h>
+#include <crypto/rc4.h>
 
-#include "win_help.h"
+#include "crypto/sha1.h"
+#include "tracker.h"
+#include "util/log.h"
+#include "util/win_help.h"
 
-
-int APIENTRY WinMain(HINSTANCE hInstance,
-                     HINSTANCE hPrevInstance,
-                     LPTSTR lpCmdLine,
-                     int nCmdShow) {
-    int argc;
-    PCHAR *argv = CommandLineToArgvA(GetCommandLineA(), &argc);
-
-    char* path = argv[1];
-    char* key = argv[2];
-
-    printf("PATH: %s\n", path);
-    printf("KEY BYTES: ");
-    print_b(key, strlen(key));
-
-    uint8_t keyhash[21];
-    SHA1(keyhash, key, strlen(key));
-    printf("KEY HASH: ");
-    print_b(keyhash, 20);
-
-    log_init(path, keyhash, 20);
-
+int observer_hook() {
     HookEvents();
+    OnLogBegin();
 
     MSG msg;
     BOOL bRet;
-
     while (1) {
         bRet = GetMessage(&msg, NULL, 0, 0);
-
         if (bRet > 0) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -48,6 +32,37 @@ int APIENTRY WinMain(HINSTANCE hInstance,
         }
     }
     UnhookEvents();
-    log_close();
     return msg.wParam;
+}
+
+int APIENTRY WinMain(HINSTANCE hInstance,
+                     HINSTANCE hPrevInstance,
+                     LPTSTR lpCmdLine,
+                     int nCmdShow) {
+    int argc;
+    PCHAR *argv = CommandLineToArgvA(GetCommandLineA(), &argc);
+
+    config_getopt(argc, argv);
+
+    log_info("path: %s", config.path);
+    log_info("key: %s", config.key);
+
+    if (config.key == NULL)
+        log_warn("key is null!");
+    if (config.key != NULL) {
+        uint8_t keyhash[21];
+        SHA1(keyhash, config.key, strlen(config.key));
+        log_init(config.path, keyhash, 20, config.mode);
+    } else {
+        log_init(config.path, NULL, 0, config.mode);
+    }
+    if (config.mode == MODE_READ) {
+        observer_interface();
+        log_close();
+    } else {
+        int code = observer_hook();
+        log_close();
+        return code;
+    }
+    return 0;
 }

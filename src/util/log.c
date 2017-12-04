@@ -26,7 +26,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "log.h"
+#include "util/log.h"
 
 static struct {
     void *udata;
